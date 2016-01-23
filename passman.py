@@ -4,6 +4,7 @@ import subprocess
 from Crypto.Cipher import AES
 import os
 import pickle
+from datetime import datetime
 
 class PassMan(object):
 
@@ -78,6 +79,7 @@ class PassMan(object):
 		newentry["account"] = account
 		newentry["username"] = username	#e.g. "ecr
 		newentry["email"] = email	#e.g. "ecr@ecr.ecr"
+		newentry["time"] = str(datetime.now())
 
 		diff16 = 16 - len(password) % 16
 		
@@ -99,8 +101,8 @@ class PassMan(object):
 			print c("No accounts to list.")
 
 		for account in self.accounts:
-			toprint = ""
-			toprint +="Account: " + account["account"]
+			toprint = "Added " + account["time"]
+			toprint +="\nAccount: " + account["account"]
 			if len(account["username"]) > 0:
 				toprint +="\nUsername: {}".format(account["username"])
 			if len(account["email"]) > 0:
@@ -135,8 +137,8 @@ class PassMan(object):
 		else:
 			afterword = "\nIf this does not look like your password, consider logging in again with a different key."
 
-		toprint = ""
-		toprint +="Account: " + tempdict["account"]
+		toprint = "Added " + tempdict["time"]
+		toprint +="\nAccount: " + tempdict["account"]
 		if len(tempdict["username"]) > 0:
 			toprint += "\nUsername: " + tempdict["username"]
 		if len(tempdict["email"]) > 0:
@@ -159,8 +161,8 @@ class PassMan(object):
 				return
 			elif confirm == self.key:
 				for account in self.accounts:
-					toprint = ""
-					toprint +="Account: " + account["account"]
+					toprint = "Added " + account["time"]
+					toprint +="\nAccount: " + account["account"]
 					if len(account["username"]) > 0:
 						toprint +="\nUsername: {}".format(account["username"])
 					if len(account["email"]) > 0:
@@ -170,8 +172,7 @@ class PassMan(object):
 					padflag = ord(passwordtoprint[len(passwordtoprint) - 1])
 					passwordtoprint = passwordtoprint[:len(passwordtoprint) - padflag]
 					toprint +="\nPassword: {}".format(passwordtoprint)
-
-					print c(toprint+"\n")
+					print c(toprint)
 				return
 			else:
 				print c("Incorrect passkey.")
