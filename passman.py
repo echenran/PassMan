@@ -5,11 +5,6 @@ from Crypto.Cipher import AES
 import os
 import pickle
 
-def c(string='kek'):
-	kek = subprocess.Popen(['lolcat', '-f'], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-	stdout, stderr = kek.communicate(input='{}'.format(string))
-	return stdout.rstrip('\n')
-
 class PassMan(object):
 
 	def __init__(self, accounts=None):
@@ -69,7 +64,7 @@ class PassMan(object):
 		if self.isplaintext is False:
 			raise ValueError("Have not logged in yet!")
 
-		print c("* denotes a mandatory field. Press <enter> to leave a field blank.")
+		print c("(*) denotes a mandatory field. Hit ENTER to leave a field blank.")
 		account = "" 
 		while len(account) == 0:
 			account = str(raw_input("Account name (*): "))
@@ -149,29 +144,67 @@ class PassMan(object):
 		toprint += "\nPassword: " + passwordtoprint
 		print c(toprint + afterword)
 
+	def getall(self):
+		"""Gets all user passwords"""                                              
+		print c("-----------------------------------------------------------------------------------------------------------------------\n          					 GET ALL PASSWORDS")
+				
+		if len(self.accounts) == 0:
+			print c("No accounts to list.")
+			return
+		
+		action = False
+		while action is False:
+			confirm = str(raw_input("Enter your PassMan passkey to confirm, or hit ENTER to cancel: "))
+			if len(confirm) == 0:
+				return
+			elif confirm == self.key:
+				for account in self.accounts:
+					toprint = ""
+					toprint +="Account: " + account["account"]
+					if len(account["username"]) > 0:
+						toprint +="\nUsername: {}".format(account["username"])
+					if len(account["email"]) > 0:
+						toprint +="\nEmail: {}".format(account["email"])
+
+					passwordtoprint = AES.new(self.key).decrypt(account["password"])
+					padflag = ord(passwordtoprint[len(passwordtoprint) - 1])
+					passwordtoprint = passwordtoprint[:len(passwordtoprint) - padflag]
+					toprint +="\nPassword: {}".format(passwordtoprint)
+
+					print c(toprint+"\n")
+				return
+			else:
+				print c("Incorrect passkey.")
+
+	
 	def deleteaccount(self):
 		"""Asks user for account to delete from dictionary"""
 		print c("-----------------------------------------------------------------------------------------------------------------------\n							DELETE ACCOUNT")
 		account = raw_input("Account name to delete (case sensitive): ")
 		
-		found = False
 		for entry in self.accounts:
 			if entry["account"] == account:
-				del self.accounts[self.accounts.index(entry)]
-				print c("The account '" + account + "' was successfully deleted.")
-				open(self.accountsfile, "w").write(pickle.dumps(self.accounts))
-				found = True
-				return
+				action = False
+				while action is False:
+					confirm = str(raw_input("Enter your PassMan passkey to confirm deletion, or hit ENTER to cancel: "))
+					if confirm == self.key:
+						del self.accounts[self.accounts.index(entry)]
+						print c("The account '" + account + "' was successfully deleted.")
+						open(self.accountsfile, "w").write(pickle.dumps(self.accounts))
+						found = True
+						return
+					elif len(confirm) == 0:
+						return
+					else:
+						print c("Incorrect passkey.")
 
-		if found is False:
-			print c("The account name '" + account + "' was not found.")
+		print c("The account name '" + account + "' was not found.")
 
-		
 
 
 def whattodo():
 	"""Asks user what they would like to in PassMan"""
-	print c("-----------------------------------------------------------------------------------------------------------------------\nWhat would you like to do? Enter the number of the task.\n0. Re-login\n1. Store a new entry\n2. View your current entries\n3. Get an entry's password\n4. Delete an entry from your stored entries\n5. Logout")
+	print c("-----------------------------------------------------------------------------------------------------------------------\nWhat would you like to do? Enter the number of the task.\n0. Re-login\n00. Logout\n1. Store a new entry\n2. View your current entries\n3. Get an entry's password\n4. Get all entries' passwords\n5. Delete an entry from your stored entries")
 	pm.task = str(raw_input("Task number: "))
 	return pm.task
 
@@ -180,6 +213,8 @@ def executetask():
 	print "-----------------------------------------------------------------------------------------------------------------------"
 	if pm.task == "0":
 		pm.login()
+	elif pm.task == "00":
+		pm.logout()
 	elif pm.task == "1":
 		pm.storenew()
 	elif pm.task == "2":
@@ -187,12 +222,18 @@ def executetask():
 	elif pm.task == "3":
 		pm.getaccount()
 	elif pm.task == "4":
-		pm.deleteaccount()
+		pm.getall()
 	elif pm.task == "5":
-		pm.logout()
+		pm.deleteaccount()
 	else:
 		print c("Invalid task number! Take a look at the options again.")
 		whattodo()
+
+def c(string='kek'):
+	kek = subprocess.Popen(['lolcat', '-f'], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+	stdout, stderr = kek.communicate(input='{}'.format(string))
+	return stdout.rstrip('\n')
+
 
 banner = subprocess.Popen(["figlet","   																																					PassMan"],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
 print c(banner.communicate()[0])
@@ -214,6 +255,6 @@ else:
 	pm = PassMan('accountdict')
 	pm.login()
 	
-while pm.task != "5":
+while pm.task != "00":
 	whattodo()
 	executetask()
