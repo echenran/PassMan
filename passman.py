@@ -24,7 +24,7 @@ class PassMan(object):
 		self.key = ""
 
 		#Name of the account dictionary
-		self.accountsfile = "accountdict"
+		self.accountsfile = ".accountdict"
 
 		if accounts is None:
 			self.accounts = []
@@ -253,8 +253,12 @@ if isfirsttime:
 	pm.login()
 	print c("Great! You can now start using PassMan.")
 else:
-	pm = PassMan('accountdict')
-	pm.login()
+	try:
+		pm = PassMan('.accountdict')
+	except:
+		pm = PassMan()
+	finally:
+		pm.login()
 	
 while pm.task != "00":
 	whattodo()
