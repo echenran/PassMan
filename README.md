@@ -24,4 +24,4 @@ or removing the .py extension from the file and doing the good ol' double-click 
 
 ### Other Notes
 
-If you move the location of the PassMan program and you've already stored passwords on it, you must move the file "accountdict" (in the same folder) to the same location! Otherwise, PassMan will not know where to look for your stored passwords and will tell you there are no accounts to list when you want to see your entries.
+The file that stores passwords, ".accountdict", is hidden so you don't delete/alter it by accident. However, if you move the location of the PassMan program and you've already stored passwords on it, you must move the file ".accountdict" (in the same folder) to the same location! Otherwise, PassMan will not know where to look for your stored passwords and will tell you there are no accounts to list when you want to see your entries.
